@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>جوک تصادفی</title>
+    <style>
+        body {
+            font-family: Tahoma, sans-serif;
+            text-align: center;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            padding: 2rem;
+            margin: 0;
+            min-height: 100vh;
+        }
+        .container {
+            background: white;
+            padding: 2rem;
+            border-radius: 15px;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+            margin: 2rem auto;
+            max-width: 600px;
+        }
+        #jokeContainer {
+            font-size: 1.3rem;
+            line-height: 1.8;
+            color: #333;
+            margin: 2rem 0;
+            padding: 1.5rem;
+            background: #f8f9fa;
+            border-radius: 10px;
+            border-right: 5px solid #667eea;
+            min-height: 60px;
+        }
+        .loading {
+            color: #666;
+            font-style: italic;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎭 جوک تصادفی</h1>
+        <p>هر ۵ ثانیه جوک جدید نمایش داده می‌شود</p>
+        
+        <div id="jokeContainer" class="loading">در حال دریافت جوک...</div>
+        
+        <button onclick="fetchJoke()" style="padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 5px; cursor: pointer;">
+            دریافت جوک جدید
+        </button>
+    </div>
+
+    <script>
+        const jokeContainer = document.getElementById('jokeContainer');
+        
+        async function fetchJoke() {
+            try {
+                jokeContainer.innerHTML = '<span class="loading">🔍 در حال دریافت جوک...</span>';
+                
+                // استفاده از CORS Proxy
+                const proxyUrl = 'https://api.allorigins.win/raw?url=';
+                const targetUrl = 'https://api.codebazan.ir/jok/';
+                
+                const response = await fetch(proxyUrl + encodeURIComponent(targetUrl));
+                
+                if (!response.ok) {
+                    throw new Error(`خطای سرور: ${response.status}`);
+                }
+                
+                const data = await response.text();
+                
+                // سعی می‌کنیم داده رو به JSON تبدیل کنیم
+                try {
+                    const jsonData = JSON.parse(data);
+                    jokeContainer.textContent = jsonData.result || jsonData.joke || jsonData;
+                } catch {
+                    // اگر JSON نبود، متن ساده رو نمایش می‌دیم
+                    jokeContainer.textContent = data;
+                }
+                
+            } catch (error) {
+                console.error('Error:', error);
+                jokeContainer.innerHTML = '❌ متاسفانه در دریافت جوک خطایی رخ داده است.<br><small>لطفاً دوباره تلاش کنید</small>';
+            }
+        }
+
+        // دریافت اولیه
+        fetchJoke();
+        
+        // به‌روزرسانی هر ۵ ثانیه
+        setInterval(fetchJoke, 5000);
+    </script>
+</body>
+</html>
